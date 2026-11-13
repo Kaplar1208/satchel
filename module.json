@@ -1,0 +1,69 @@
+{
+  "id": "satchel",
+  "title": "Satchel",
+  "description": "A mobile character sheet for D&D 5e. On a phone, Satchel replaces Foundry's interface with a touch-friendly sheet: check your character, roll skills, saves, attacks and spells, and keep the canvas off so it loads fast.",
+  "version": "0.4.0",
+  "authors": [
+    {
+      "name": "Kaplar",
+      "flags": {}
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13.351"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "5.0.0",
+          "verified": "5.3.3"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "midi-qol",
+        "type": "module",
+        "reason": "Optional: when active, attacks and spells run through midi-qol's workflow (attack and damage in one tap).",
+        "compatibility": {}
+      },
+      {
+        "id": "really-inspired",
+        "type": "module",
+        "reason": "Optional: when active, Satchel shows its inspiration counter and uses its reroll flow.",
+        "compatibility": {}
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/satchel.mjs"
+  ],
+  "styles": [
+    {
+      "src": "styles/satchel.css"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json",
+      "flags": {}
+    },
+    {
+      "lang": "es",
+      "name": "Español",
+      "path": "lang/es.json",
+      "flags": {}
+    }
+  ],
+  "url": "https://github.com/Kaplar1208/satchel",
+  "manifest": "https://raw.githubusercontent.com/Kaplar1208/satchel/main/module.json",
+  "download": "https://github.com/Kaplar1208/satchel/releases/latest/download/satchel.zip",
+  "bugs": "https://github.com/Kaplar1208/satchel/issues",
+  "flags": {}
+}

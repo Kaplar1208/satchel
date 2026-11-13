@@ -1,0 +1,600 @@
+/* Satchel — mobile sheet. Everything in px so it doesn't depend on Foundry's UI scale. */
+
+:root {
+  --sat-bg: #16130f;
+  --sat-card: #221d17;
+  --sat-line: #3a3128;
+  --sat-text: #efe6d8;
+  --sat-muted: #a89a86;
+  --sat-accent: #c9a24a;
+  --sat-good: #6fae5e;
+  --sat-bad: #c4553f;
+  --sat-hp: #b5403a;
+  --sat-radius: 12px;
+}
+
+/* ---------- hide Foundry ---------- */
+
+/* Everything hanging off <body> is hidden (Foundry's UI, other modules' HUDs such as
+   Calendaria or Dice So Nice…), except Satchel and allowed dialogs. */
+html.satchel-ready body > *:not(#satchel):not(#satchel-splash):not(.satchel-allow):not(#tooltip):not(.locked-tooltip):not(#context-menu) {
+  display: none !important;
+}
+
+/* Windows opened by a Satchel action (midi usage, spell slot…): nearly full screen. */
+html.satchel-ready body > .satchel-allow {
+  position: fixed !important;
+  left: 8px !important;
+  right: 8px !important;
+  top: max(8px, env(safe-area-inset-top)) !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: calc(100dvh - 16px) !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 1000 !important;
+  font-size: 15px;
+}
+html.satchel-ready body > .satchel-allow .window-content {
+  max-height: calc(100dvh - 72px);
+  overflow-y: auto;
+}
+html.satchel-ready body > .satchel-allow button { min-height: 40px; }
+html.satchel-ready body > .satchel-allow.minimized .window-content { display: none; }
+
+/* Loading screen: covers everything until Satchel is ready. */
+#satchel-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--sat-bg);
+  color: var(--sat-text);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.sat-splash-box { width: 100%; max-width: 420px; text-align: center; }
+.sat-splash-title { font-size: 28px; font-weight: 800; color: var(--sat-accent); margin-bottom: 8px; }
+.sat-splash-stage { color: var(--sat-muted); }
+.sat-splash-stage b { color: var(--sat-text); }
+.sat-splash-errors {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 10px;
+  text-align: left;
+  font: 12px/1.4 ui-monospace, Menlo, monospace;
+  color: #f0b4a8;
+  background: #2a1512;
+  border-radius: 8px;
+  max-height: 40vh;
+  overflow-y: auto;
+  word-break: break-word;
+  user-select: text;
+}
+.sat-splash-errors li + li { margin-top: 6px; }
+.sat-splash-actions { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+#satchel-splash .sat-splash-actions button {
+  width: auto;
+  height: auto;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--sat-accent);
+  background: none;
+  color: var(--sat-text);
+  font: 600 14px system-ui, sans-serif;
+}
+
+html.satchel-active body {
+  background: var(--sat-bg) !important;
+}
+
+/* ---------- container ---------- */
+
+#satchel {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* Foundry windows (dialogs) stay on top */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--sat-bg);
+  color: var(--sat-text);
+  font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(24px, env(safe-area-inset-bottom));
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+  box-sizing: border-box;
+}
+#satchel *, #satchel *::before, #satchel *::after { box-sizing: border-box; }
+
+#satchel button,
+#satchel select {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
+  height: auto;
+  min-height: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+#satchel button:focus-visible { outline: 2px solid var(--sat-accent); outline-offset: 2px; }
+#satchel button.busy { opacity: .5; }
+
+#satchel h2 {
+  margin: 0 0 4px;
+  border: 0;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--sat-accent);
+}
+
+/* ---------- header ---------- */
+
+.sat-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sat-portrait {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  border: 2px solid var(--sat-accent);
+  flex: none;
+}
+.sat-ident { flex: 1; min-width: 0; }
+.sat-name, .sat-picker, .sat-title {
+  font-size: 19px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+#satchel .sat-picker {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 18px;
+  background: linear-gradient(45deg, transparent 50%, var(--sat-muted) 50%) right 6px center / 6px 6px no-repeat,
+              linear-gradient(-45deg, transparent 50%, var(--sat-muted) 50%) right 0 center / 6px 6px no-repeat;
+}
+#satchel .sat-picker option { background: var(--sat-card); color: var(--sat-text); }
+.sat-sub { color: var(--sat-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#satchel .sat-link {
+  flex: none;
+  font-size: 12px;
+  color: var(--sat-muted);
+  border: 1px solid var(--sat-line);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+/* ---------- vitals ---------- */
+
+.sat-vitals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sat-hp {
+  grid-column: 1 / -1;
+  background: var(--sat-card);
+  border-radius: var(--sat-radius);
+  padding: 10px 12px;
+}
+.sat-hp-bar { height: 8px; border-radius: 4px; background: #3b1d1a; overflow: hidden; }
+.sat-hp-bar span { display: block; height: 100%; background: var(--sat-hp); transition: width .3s; }
+.sat-hp-text { margin-top: 6px; font-size: 14px; color: var(--sat-muted); }
+.sat-hp-text b { font-size: 20px; color: var(--sat-text); }
+.sat-temp { color: #6aa7d8; font-weight: 700; margin-left: 4px; }
+
+#satchel .sat-stat {
+  background: var(--sat-card);
+  border-radius: var(--sat-radius);
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.sat-stat small { font-size: 11px; color: var(--sat-muted); text-transform: uppercase; letter-spacing: .05em; }
+.sat-stat b { font-size: 20px; }
+#satchel .sat-tap { border: 1px solid var(--sat-accent); }
+
+#satchel .sat-death {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: var(--sat-radius);
+  background: var(--sat-bad);
+  font-weight: 700;
+}
+
+/* ---------- advantage / disadvantage ---------- */
+
+.sat-mode {
+  position: sticky;
+  top: -12px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  margin: 0 -4px 10px;
+  border-radius: 999px;
+  background: var(--sat-card);
+  border: 1px solid var(--sat-line);
+}
+#satchel .sat-mode button {
+  padding: 8px 0;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--sat-muted);
+}
+#satchel .sat-mode button.active { color: #16130f; font-weight: 700; background: var(--sat-accent); }
+#satchel .sat-mode button.active.advantage { background: var(--sat-good); }
+#satchel .sat-mode button.active.disadvantage { background: var(--sat-bad); color: var(--sat-text); }
+
+/* ---------- cards ---------- */
+
+.sat-card {
+  background: var(--sat-card);
+  border-radius: var(--sat-radius);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.sat-hint { margin: 0 0 10px; font-size: 12px; color: var(--sat-muted); }
+
+.sat-abilities {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.sat-ability {
+  border: 1px solid var(--sat-line);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.sat-abbr { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--sat-muted); }
+.sat-score { font-size: 12px; color: var(--sat-muted); }
+#satchel .sat-mod {
+  width: 100%;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: #2d261e;
+}
+#satchel .sat-save {
+  width: 100%;
+  font-size: 12px;
+  padding: 6px 0;
+  border-radius: 8px;
+  border: 1px solid var(--sat-line);
+  color: var(--sat-muted);
+}
+#satchel .sat-save.prof { border-color: var(--sat-accent); color: var(--sat-text); }
+
+.sat-skills { list-style: none; margin: 4px 0 0; padding: 0; }
+.sat-skills li + li { border-top: 1px solid var(--sat-line); }
+#satchel .sat-skill {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 2px;
+  text-align: left;
+}
+.sat-skill-name { flex: 1; min-width: 0; }
+.sat-skill-name small, .sat-passive small { color: var(--sat-muted); font-size: 11px; }
+.sat-passive { color: var(--sat-muted); font-size: 13px; }
+.sat-skill b { width: 36px; text-align: right; font-size: 17px; }
+.sat-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sat-muted); flex: none; }
+.sat-dot.half { background: linear-gradient(90deg, var(--sat-accent) 50%, transparent 50%); border-color: var(--sat-accent); }
+.sat-dot.prof { background: var(--sat-accent); border-color: var(--sat-accent); }
+.sat-dot.expert { background: var(--sat-accent); border-color: var(--sat-text); box-shadow: 0 0 0 2px var(--sat-accent); }
+
+.sat-empty { color: var(--sat-muted); padding: 24px 4px; }
+.sat-foot { text-align: center; font-size: 11px; color: var(--sat-muted); padding: 8px 0 60px; }
+
+/* ---------- result toast ---------- */
+
+.sat-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  min-width: 180px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: #0d0b09ee;
+  border: 1px solid var(--sat-accent);
+  text-align: center;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sat-toast[hidden] { display: none; }
+.sat-toast.error { border-color: var(--sat-bad); }
+.sat-toast-label { font-size: 12px; color: var(--sat-muted); }
+.sat-toast-total { font-size: 40px; font-weight: 800; line-height: 1.1; }
+.sat-toast-total.crit { color: var(--sat-good); }
+.sat-toast-total.fumble { color: var(--sat-bad); }
+.sat-toast-nat { font-size: 12px; color: var(--sat-muted); }
+
+/* ---------- return button (full Foundry mode on a phone) ---------- */
+
+#satchel-reopen {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1000;
+  width: auto;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--sat-accent);
+  background: var(--sat-bg);
+  color: var(--sat-text);
+  font: 700 14px system-ui, sans-serif;
+}
+
+/* ---------- tabs ---------- */
+
+.sat-sticky {
+  position: sticky;
+  top: -12px;
+  z-index: 2;
+  margin: 0 -12px 10px;
+  padding: 6px 12px 0;
+  background: var(--sat-bg);
+}
+.sat-sticky .sat-mode { position: static; margin: 0 0 6px; }
+.sat-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-bottom: 6px;
+}
+.sat-tabs::-webkit-scrollbar { display: none; }
+#satchel .sat-tabs button {
+  flex: 1 0 auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--sat-muted);
+  border: 1px solid var(--sat-line);
+}
+#satchel .sat-tabs button.active { color: var(--sat-text); border-color: var(--sat-accent); background: var(--sat-card); font-weight: 700; }
+
+#satchel h3 {
+  margin: 12px 0 2px;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sat-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.sat-row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sat-muted { color: var(--sat-muted); }
+
+/* ---------- item rows ---------- */
+
+.sat-items { list-style: none; margin: 0; padding: 0; }
+.sat-item + .sat-item { border-top: 1px solid var(--sat-line); }
+.sat-item { padding: 8px 0; }
+.sat-item-head { display: flex; align-items: center; gap: 8px; }
+#satchel .sat-item-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.sat-item-name img { width: 34px; height: 34px; border-radius: 6px; border: 0; flex: none; object-fit: cover; }
+.sat-item-name span { min-width: 0; display: flex; flex-direction: column; }
+.sat-item-name b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sat-item-name small { color: var(--sat-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sat-item.open .sat-item-name b,
+.sat-item.open .sat-item-name small { white-space: normal; }
+.sat-item-side { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.sat-item-side small { color: var(--sat-muted); font-size: 11px; }
+.sat-big { font-size: 18px; }
+.sat-item-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0 44px; }
+#satchel .sat-btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--sat-accent);
+  color: #16130f;
+  font-size: 13px;
+  font-weight: 700;
+}
+#satchel .sat-btn.ghost { background: none; color: var(--sat-text); border: 1px solid var(--sat-accent); }
+#satchel .sat-equip {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--sat-line);
+  font-weight: 700;
+}
+#satchel .sat-equip.on { border-color: var(--sat-accent); color: var(--sat-accent); }
+
+.sat-desc {
+  margin: 8px 0 0 44px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #1b1712;
+  font-size: 14px;
+  line-height: 1.45;
+  user-select: text;
+  overflow-wrap: anywhere;
+}
+.sat-desc p { margin: 0 0 8px; }
+.sat-desc img { max-width: 100%; height: auto; }
+.sat-desc table { width: 100%; font-size: 12px; }
+.sat-desc a { color: var(--sat-accent); }
+
+/* ---------- spells ---------- */
+
+.sat-spell-head { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.sat-spell-head div { display: flex; flex-direction: column; }
+.sat-spell-head small { font-size: 11px; color: var(--sat-muted); text-transform: uppercase; }
+.sat-spell-head b { font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sat-slots { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.sat-slot { display: flex; align-items: center; gap: 10px; }
+.sat-slot-lvl { width: 64px; font-size: 13px; color: var(--sat-muted); }
+.sat-pips { flex: 1; display: flex; flex-wrap: wrap; gap: 5px; }
+.sat-pip { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--sat-accent); }
+.sat-pip.full { background: var(--sat-accent); }
+.sat-slot-ctl { display: flex; gap: 4px; }
+#satchel .sat-slot-ctl button {
+  width: 32px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--sat-line);
+  font-size: 16px;
+}
+
+/* ---------- inventory ---------- */
+
+.sat-coins { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
+.sat-coin { display: flex; flex-direction: column; padding: 6px 0; border-radius: 8px; background: #1b1712; }
+.sat-coin b { font-size: 17px; }
+.sat-coin small { font-size: 11px; color: var(--sat-muted); text-transform: uppercase; }
+.sat-coin.gp b { color: var(--sat-accent); }
+.sat-enc { margin-top: 10px; }
+.sat-enc small { color: var(--sat-muted); font-size: 12px; }
+.sat-hp-bar.enc { background: #2d261e; }
+.sat-hp-bar.enc span { background: var(--sat-accent); }
+
+/* ---------- result with several rolls (attack + damage) ---------- */
+
+.sat-toast-rolls { display: flex; gap: 18px; justify-content: center; }
+.sat-toast-rolls > div { display: flex; flex-direction: column; align-items: center; }
+.sat-toast-total.dmg { color: #e7a35a; }
+
+/* Foundry v13 centers the content of every <button>; rows need it left-aligned. */
+#satchel .sat-item-name,
+#satchel .sat-skill { justify-content: flex-start; }
+#satchel .sat-item-name span { align-items: flex-start; text-align: left; }
+#satchel .sat-item-actions { margin-left: 44px; justify-content: flex-start; }
+
+/* Long names: with align-items:flex-start children take their text's width and overflow
+   the row. Constrain them to the available width; names use up to 2 lines. */
+#satchel .sat-item-name span { flex: 1; }
+#satchel .sat-item-name b,
+#satchel .sat-item-name small { max-width: 100%; }
+#satchel .sat-item-name b {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+#satchel .sat-item.open .sat-item-name b { -webkit-line-clamp: unset; line-clamp: none; }
+
+/* All 5 tabs fit without horizontal scrolling on 320px screens. */
+#satchel .sat-tabs button {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 1px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tabs never scroll horizontally. The font scales with screen width and, if it still
+   doesn't fit, the label is truncated with "…" instead of overflowing. */
+#satchel .sat-tabs {
+  overflow: hidden;
+  gap: 3px;
+}
+#satchel .sat-tabs button {
+  font-size: clamp(10px, 3.3vw, 13px);
+  padding: 8px 0;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- sticky header (down to advantage/disadvantage) ---------- */
+
+/* The whole top stays pinned: name, HP, AC, initiative, inspiration, tabs and roll
+   mode. When scrolled it compacts to leave room for the list. */
+#satchel .sat-head {
+  position: sticky;
+  top: calc(-1 * max(12px, env(safe-area-inset-top)));
+  z-index: 3;
+  margin: calc(-1 * max(12px, env(safe-area-inset-top))) -12px 10px;
+  padding: max(12px, env(safe-area-inset-top)) 12px 0;
+  background: var(--sat-bg);
+  box-shadow: 0 6px 10px -8px #000;
+}
+#satchel .sat-sticky { position: static; margin: 0; padding: 0; }
+
+#satchel .sat-vitals { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+#satchel .sat-stat b { font-size: 18px; }
+
+#satchel .sat-insp.on { border: 1px solid var(--sat-accent); }
+#satchel .sat-insp.on b { color: var(--sat-accent); }
+
+/* compact */
+#satchel .sat-top,
+#satchel .sat-vitals,
+#satchel .sat-portrait { transition: all .15s ease; }
+#satchel.compact .sat-top { margin-bottom: 6px; }
+#satchel.compact .sat-portrait { width: 30px; height: 30px; }
+#satchel.compact .sat-sub,
+#satchel.compact .sat-link,
+#satchel.compact .sat-minor,
+#satchel.compact .sat-stat small { display: none; }
+#satchel.compact .sat-name,
+#satchel.compact .sat-picker { font-size: 16px; }
+#satchel.compact .sat-vitals { grid-template-columns: 2fr repeat(3, 1fr); margin-bottom: 6px; }
+#satchel.compact .sat-hp { grid-column: auto; padding: 4px 8px; }
+#satchel.compact .sat-hp-bar { height: 5px; }
+#satchel.compact .sat-hp-text { margin-top: 2px; font-size: 12px; }
+#satchel.compact .sat-hp-text b { font-size: 15px; }
+#satchel.compact .sat-stat { padding: 4px 2px; justify-content: center; }
+#satchel.compact .sat-stat b { font-size: 16px; }
+#satchel.compact .sat-deathcard { padding: 6px 10px; margin-bottom: 6px; }
+
+/* ---------- death saves ---------- */
+
+.sat-deathcard.dying { border: 1px solid var(--sat-bad); background: #2a1512; }
+.sat-death-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sat-death-track { display: flex; flex-direction: column; gap: 4px; }
+.sat-death-track span { display: flex; align-items: center; gap: 5px; }
+.sat-death-track small { width: 70px; font-size: 11px; color: var(--sat-muted); }
+.sat-pip.good { border-color: var(--sat-good); }
+.sat-pip.good.full { background: var(--sat-good); }
+.sat-pip.bad { border-color: var(--sat-bad); }
+.sat-pip.bad.full { background: var(--sat-bad); }
+#satchel .sat-btn.danger { background: var(--sat-bad); color: var(--sat-text); }
+
+/* ---------- inspiration reroll ---------- */
+
+#satchel .sat-reroll { margin-top: 8px; }
+.sat-death-status { color: var(--sat-muted); font-size: 12px; text-align: right; max-width: 45%; }
