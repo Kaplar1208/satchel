@@ -1,5 +1,7 @@
 # Satchel
 
+![Downloads](https://img.shields.io/github/downloads/Kaplar1208/satchel/total?style=for-the-badge) ![GitHub issues](https://img.shields.io/github/issues/Kaplar1208/satchel?style=for-the-badge) ![GitHub release](https://img.shields.io/github/v/release/Kaplar1208/satchel?style=for-the-badge) ![Foundry Core Compatible Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fgithub.com%2FKaplar1208%2Fsatchel%2Freleases%2Flatest%2Fdownload%2Fmodule.json&label=Foundry%20Version&query=$.compatibility.verified&colorB=orange&style=for-the-badge) ![dnd5e Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fgithub.com%2FKaplar1208%2Fsatchel%2Freleases%2Flatest%2Fdownload%2Fmodule.json&label=dnd5e&query=$.relationships.systems%5B0%5D.compatibility.verified&colorB=red&style=for-the-badge) ![License](https://img.shields.io/github/license/Kaplar1208/satchel?style=for-the-badge)
+
 A mobile character sheet for **Foundry VTT v13** and the **D&D 5e** system (5.x).
 
 Foundry isn't built for phones: the canvas is heavy and the interface doesn't fit a small screen. When a player opens Foundry on a phone, Satchel replaces the interface with a touch-friendly character sheet. Players can check their character and roll from it, and the rolls land in the Foundry chat like any other roll.
