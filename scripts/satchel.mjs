@@ -1,5 +1,5 @@
 /**
- * Satchel — mobile character sheet for Foundry VTT v13 + dnd5e 5.x
+ * Satchel — mobile character sheet for Foundry VTT v13-v14 + dnd5e 5.x-6.x
  *
  * On a phone it disables the canvas (on that device only), hides the Foundry UI
  * and shows a touch-friendly sheet that rolls through the native dnd5e API.
@@ -269,7 +269,7 @@ function riRerollOption(messageId) {
 function canRerollWithInspiration(msg, actor) {
   if (game.user.isGM) return false;
   const first = msg.rolls?.[0];
-  if (!(first instanceof CONFIG.Dice.D20Roll)) return false;
+  if (!(first instanceof CONFIG.Dice.D20Roll) && first?.constructor?.name !== "D20Roll") return false;
   if (riActive()) {
     const ri = riRerollOption(msg.id);
     if (ri) return Boolean(ri.option.condition?.(ri.li) ?? true);
@@ -314,7 +314,7 @@ function standInToken(actor) {
     if (!scene) return null;
     const data = actor.prototypeToken.toObject();
     data.actorId = actor.id;
-    doc = new (getDocumentClass("Token"))(data, { parent: scene });
+    doc = new CONFIG.Token.documentClass(data, { parent: scene });
   }
   const token = Object.create(CONFIG.Token.objectClass.prototype);
   Object.defineProperties(token, {
@@ -458,7 +458,8 @@ class SatchelApp {
     this.seenRolls.set(msg.id, rolls.length);
 
     // midi appends damage to the attack's message: show all of its rolls together.
-    const itemId = msg.flags?.dnd5e?.item?.id;
+    // dnd5e 6 (Foundry v14) moved this from flags.dnd5e to the message's system data.
+    const itemId = msg.system?.item?.id ?? msg.flags?.dnd5e?.item?.id;
     const itemName = itemId ? this.actor?.items.get(itemId)?.name : null;
     const title = itemName || stripHTML(msg.flavor) || msg.speaker?.alias || "";
     const parts = rolls.map(roll => {

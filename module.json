@@ -2,7 +2,7 @@
   "id": "satchel",
   "title": "Satchel",
   "description": "A mobile character sheet for D&D 5e. On a phone, Satchel replaces Foundry's interface with a touch-friendly sheet: check your character, roll skills, saves, attacks and spells, and keep the canvas off so it loads fast.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "authors": [
     {
       "name": "Kaplar",
@@ -11,7 +11,7 @@
   ],
   "compatibility": {
     "minimum": "13",
-    "verified": "13.351"
+    "verified": "14.370"
   },
   "relationships": {
     "systems": [
@@ -20,7 +20,7 @@
         "type": "system",
         "compatibility": {
           "minimum": "5.0.0",
-          "verified": "5.3.3"
+          "verified": "6.1.1"
         }
       }
     ],
